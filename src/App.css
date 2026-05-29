@@ -1,0 +1,976 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+
+  font-family:'Inter', sans-serif;
+
+  background:
+    linear-gradient(
+      135deg,
+      #020617,
+      #0f172a,
+      #111827
+    );
+
+  color:white;
+
+  min-height:100vh;
+
+  padding:30px;
+
+}
+
+/* TOPBAR */
+
+.topbar{
+
+  width:100%;
+
+  max-width:1400px;
+
+  margin:auto;
+  margin-bottom:25px;
+
+  display:flex;
+
+  gap:15px;
+
+}
+
+.topbar button{
+
+  border:none;
+
+  padding:14px 22px;
+
+  border-radius:14px;
+
+  background:
+    rgba(255,255,255,.08);
+
+  color:white;
+
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:.3s;
+
+  backdrop-filter:blur(10px);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+}
+
+.topbar button:hover{
+
+  transform:translateY(-2px);
+
+  background:
+    rgba(255,255,255,.12);
+
+}
+
+/* CONTENEDORES */
+
+.contenedor,
+.contenedor-admin{
+
+  max-width:1400px;
+
+  margin:auto;
+
+  display:grid;
+
+  grid-template-columns:
+    420px 1fr;
+
+  gap:25px;
+
+  align-items:start;
+
+}
+
+/* CARD */
+
+.card{
+
+  background:
+    rgba(255,255,255,.06);
+
+  backdrop-filter:blur(16px);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  border-radius:28px;
+
+  padding:30px;
+
+  box-shadow:
+    0 10px 40px rgba(0,0,0,.35);
+
+}
+
+/* TITULOS */
+
+h1{
+
+  font-size:32px;
+
+  font-weight:800;
+
+  margin-bottom:10px;
+
+}
+
+h2{
+
+  font-size:26px;
+
+  font-weight:700;
+
+  margin-bottom:25px;
+
+}
+
+.subtitulo{
+
+  color:#94a3b8;
+
+  margin-bottom:30px;
+
+  line-height:1.5;
+
+}
+
+/* FORM */
+
+form{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:18px;
+
+}
+
+.input-group{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:8px;
+
+}
+
+label{
+
+  color:#cbd5e1;
+
+  font-size:14px;
+
+  font-weight:500;
+
+}
+
+input,
+select{
+
+  width:100%;
+
+  padding:16px;
+
+  border-radius:16px;
+
+  border:none;
+
+  outline:none;
+
+  background:
+    rgba(255,255,255,.05);
+
+  color:white;
+
+  font-size:15px;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  transition:.3s;
+
+}
+
+input:focus,
+select:focus{
+
+  border:
+    1px solid #38bdf8;
+
+  box-shadow:
+    0 0 0 4px rgba(56,189,248,.15);
+
+}
+
+select option{
+
+  color:black;
+
+}
+
+/* BOTONES */
+
+button{
+
+  border:none;
+
+  padding:16px;
+
+  border-radius:16px;
+
+  cursor:pointer;
+
+  transition:.3s;
+
+  font-weight:700;
+
+}
+
+form button{
+
+  background:
+    linear-gradient(
+      135deg,
+      #0ea5e9,
+      #2563eb
+    );
+
+  color:white;
+
+  margin-top:10px;
+
+  font-size:15px;
+
+}
+
+form button:hover{
+
+  transform:translateY(-2px);
+
+  box-shadow:
+    0 10px 25px rgba(37,99,235,.35);
+
+}
+
+/* PREVIEW */
+
+.preview-container{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:15px;
+
+  background:
+    rgba(255,255,255,.04);
+
+  padding:12px;
+
+  border-radius:18px;
+
+}
+
+.preview{
+
+  width:70px;
+  height:70px;
+
+  border-radius:16px;
+
+  object-fit:cover;
+
+  border:
+    2px solid rgba(255,255,255,.08);
+
+}
+
+.preview-info p{
+
+  font-weight:600;
+
+}
+
+.preview-info span{
+
+  font-size:13px;
+
+  color:#94a3b8;
+
+}
+
+/* CALENDARIO */
+
+.calendario{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+
+  gap:12px;
+
+}
+
+.dia,
+.reservado{
+
+  height:65px;
+
+  border-radius:18px;
+
+  display:flex;
+
+  justify-content:center;
+  align-items:center;
+
+  font-weight:700;
+
+  transition:.3s;
+
+}
+
+.dia{
+
+  background:
+    rgba(255,255,255,.05);
+
+  border:
+    1px solid rgba(255,255,255,.05);
+
+}
+
+.dia:hover{
+
+  transform:translateY(-3px);
+
+  background:
+    rgba(255,255,255,.08);
+
+}
+
+.reservado{
+
+  background:
+    linear-gradient(
+      135deg,
+      #ef4444,
+      #dc2626
+    );
+
+  box-shadow:
+    0 8px 20px rgba(239,68,68,.35);
+
+}
+
+/* RESERVACIONES */
+
+.lista-reservaciones{
+
+  margin-top:25px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:18px;
+
+}
+
+.reservacion{
+
+  background:
+    rgba(255,255,255,.04);
+
+  border:
+    1px solid rgba(255,255,255,.06);
+
+  border-radius:22px;
+
+  padding:22px;
+
+  transition:.3s;
+
+}
+
+.reservacion:hover{
+
+  transform:translateY(-3px);
+
+  background:
+    rgba(255,255,255,.06);
+
+}
+
+.reservacion strong{
+
+  font-size:18px;
+
+}
+
+.info{
+
+  margin-top:14px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:8px;
+
+  color:#cbd5e1;
+
+}
+
+/* ESTADOS */
+
+.estado{
+
+  width:max-content;
+
+  margin-top:15px;
+
+  padding:8px 14px;
+
+  border-radius:12px;
+
+  font-size:13px;
+
+  font-weight:700;
+
+  text-transform:capitalize;
+
+}
+
+.aprobado{
+
+  background:#16a34a;
+
+  color:white;
+
+}
+
+.rechazado{
+
+  background:#dc2626;
+
+  color:white;
+
+}
+
+.pendiente{
+
+  background:#eab308;
+
+  color:black;
+
+}
+
+/* COMPROBANTE */
+
+.comprobante{
+
+  width:90px;
+  height:90px;
+
+  margin-top:16px;
+
+  border-radius:18px;
+
+  object-fit:cover;
+
+  cursor:pointer;
+
+  border:
+    2px solid rgba(255,255,255,.08);
+
+  transition:.3s;
+
+}
+
+.comprobante:hover{
+
+  transform:scale(1.05);
+
+}
+
+/* ACCIONES */
+
+.acciones{
+
+  margin-top:18px;
+
+  display:flex;
+
+  gap:12px;
+
+}
+
+.btn-aprobar{
+
+  flex:1;
+
+  background:#16a34a;
+
+  color:white;
+
+}
+
+.btn-aprobar:hover{
+
+  background:#15803d;
+
+}
+
+.btn-rechazar{
+
+  flex:1;
+
+  background:#dc2626;
+
+  color:white;
+
+}
+
+.btn-rechazar:hover{
+
+  background:#b91c1c;
+
+}
+
+/* MODAL */
+
+.modal{
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+    rgba(0,0,0,.85);
+
+  display:flex;
+
+  justify-content:center;
+  align-items:center;
+
+  z-index:999;
+
+  padding:30px;
+
+  animation:fade .2s ease;
+
+}
+
+.imagen-modal{
+
+  max-width:90%;
+  max-height:90%;
+
+  border-radius:24px;
+
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.45);
+
+}
+
+@keyframes fade{
+
+  from{
+    opacity:0;
+  }
+
+  to{
+    opacity:1;
+  }
+
+}
+
+/* SCROLL */
+
+::-webkit-scrollbar{
+
+  width:8px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+  background:#334155;
+
+  border-radius:20px;
+
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1000px){
+
+  .contenedor,
+  .contenedor-admin{
+
+    grid-template-columns:1fr;
+
+  }
+
+}
+
+@media(max-width:600px){
+
+  body{
+
+    padding:15px;
+
+  }
+
+  .card{
+
+    padding:22px;
+
+  }
+
+  h1{
+
+    font-size:26px;
+
+  }
+
+  h2{
+
+    font-size:22px;
+
+  }
+
+  .dia,
+  .reservado{
+
+    height:52px;
+
+    font-size:14px;
+
+  }
+
+}
+
+/* NUEVO CALENDARIO PREMIUM */
+
+.calendario{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+
+  gap:14px;
+
+}
+
+.dia-card{
+
+  background:
+    rgba(255,255,255,.05);
+
+  border:
+    1px solid rgba(255,255,255,.06);
+
+  border-radius:20px;
+
+  padding:12px;
+
+  min-height:90px;
+
+  transition:.3s;
+
+}
+
+.dia-card:hover{
+
+  transform:translateY(-3px);
+
+  background:
+    rgba(255,255,255,.07);
+
+}
+
+.numero-dia{
+
+  font-size:18px;
+
+  font-weight:800;
+
+  margin-bottom:12px;
+
+}
+
+.horarios-dia{
+
+  display:flex;
+
+  gap:6px;
+
+}
+
+.slot{
+
+  flex:1;
+
+  height:16px;
+
+  border-radius:20px;
+
+  background:
+    rgba(255,255,255,.08);
+
+}
+
+.ocupado-manana{
+
+  background:
+    linear-gradient(
+      135deg,
+      #38bdf8,
+      #0284c7
+    );
+
+  box-shadow:
+    0 0 10px rgba(56,189,248,.5);
+
+}
+
+.ocupado-tarde{
+
+  background:
+    linear-gradient(
+      135deg,
+      #facc15,
+      #eab308
+    );
+
+  box-shadow:
+    0 0 10px rgba(250,204,21,.4);
+
+}
+
+.ocupado-noche{
+
+  background:
+    linear-gradient(
+      135deg,
+      #ef4444,
+      #dc2626
+    );
+
+  box-shadow:
+    0 0 10px rgba(239,68,68,.45);
+
+}
+
+
+/* NUEVO CALENDARIO PREMIUM */
+
+.calendario{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(7, 1fr);
+
+  gap:14px;
+
+}
+
+.dia-card{
+
+  background:
+    rgba(255,255,255,.05);
+
+  border:
+    1px solid rgba(255,255,255,.06);
+
+  border-radius:20px;
+
+  padding:12px;
+
+  min-height:90px;
+
+  transition:.3s;
+
+}
+
+.dia-card:hover{
+
+  transform:translateY(-3px);
+
+  background:
+    rgba(255,255,255,.07);
+
+}
+
+.numero-dia{
+
+  font-size:18px;
+
+  font-weight:800;
+
+  margin-bottom:12px;
+
+}
+
+.horarios-dia{
+
+  display:flex;
+
+  gap:6px;
+
+}
+
+.slot{
+
+  flex:1;
+
+  height:16px;
+
+  border-radius:20px;
+
+  background:
+    rgba(255,255,255,.08);
+
+}
+
+.ocupado-manana{
+
+  background:
+    linear-gradient(
+      135deg,
+      #38bdf8,
+      #0284c7
+    );
+
+  box-shadow:
+    0 0 10px rgba(56,189,248,.5);
+
+}
+
+.ocupado-tarde{
+
+  background:
+    linear-gradient(
+      135deg,
+      #facc15,
+      #eab308
+    );
+
+  box-shadow:
+    0 0 10px rgba(250,204,21,.4);
+
+}
+
+.ocupado-noche{
+
+  background:
+    linear-gradient(
+      135deg,
+      #ef4444,
+      #dc2626
+    );
+
+  box-shadow:
+    0 0 10px rgba(239,68,68,.45);
+
+}
+
+/* TOOLTIP */
+
+.slot-wrapper{
+
+  position:relative;
+
+  flex:1;
+
+}
+
+.tooltip{
+
+  position:absolute;
+
+  bottom:28px;
+
+  left:50%;
+
+  transform:
+    translateX(-50%);
+
+  background:
+    rgba(15,23,42,.98);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  padding:10px 12px;
+
+  border-radius:14px;
+
+  min-width:140px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:4px;
+
+  opacity:0;
+
+  pointer-events:none;
+
+  transition:.2s;
+
+  z-index:50;
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.35);
+
+}
+
+.tooltip strong{
+
+  font-size:13px;
+
+  color:white;
+
+}
+
+.tooltip span{
+
+  font-size:12px;
+
+  color:#cbd5e1;
+
+}
+
+.slot-wrapper:hover .tooltip{
+
+  opacity:1;
+
+  bottom:34px;
+
+}
+
