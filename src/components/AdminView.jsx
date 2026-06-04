@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "../supabase";
 
 function AdminView({
 
@@ -10,29 +11,83 @@ function AdminView({
   const [imagenGrande, setImagenGrande] =
     useState(null);
 
-  const aprobarReservacion = (index) => {
+const aprobarReservacion = async (id) => {
 
-    const nuevas =
-      [...reservaciones];
+  const { error } =
+    await supabase
+      .from("reservaciones")
+      .update({
+        estado: "aprobado"
+      })
+      .eq("id", id);
 
-    nuevas[index].estado =
-      "aprobado";
+  if(error){
 
-    setReservaciones(nuevas);
+    console.error(error);
 
-  };
+    alert("Error al aprobar");
 
-  const rechazarReservacion = (index) => {
+    return;
 
-    const nuevas =
-      [...reservaciones];
+  }
 
-    nuevas[index].estado =
-      "rechazado";
+  setReservaciones(
 
-    setReservaciones(nuevas);
+    reservaciones.map((r) =>
 
-  };
+      r.id === id
+
+        ? {
+            ...r,
+            estado: "aprobado"
+          }
+
+        : r
+
+    )
+
+  );
+
+};
+
+const rechazarReservacion = async (id) => {
+
+  const { error } =
+    await supabase
+      .from("reservaciones")
+      .update({
+        estado: "rechazado"
+      })
+      .eq("id", id);
+
+  if(error){
+
+    console.error(error);
+
+    alert("Error al rechazar");
+
+    return;
+
+  }
+
+  setReservaciones(
+
+    reservaciones.map((r) =>
+
+      r.id === id
+
+        ? {
+            ...r,
+            estado: "rechazado"
+          }
+
+        : r
+
+    )
+
+  );
+
+};
 
   return (
 
@@ -60,7 +115,7 @@ function AdminView({
               <div className="info">
 
                 <span>
-                  📅 {r.fechaReservada}
+                  📅 {r.fechareservada}
                 </span>
 
                 <span>
@@ -68,11 +123,11 @@ function AdminView({
                 </span>
 
                 <span>
-                  📝 {r.fechaRegistro}
+                  📝 {r.fecharegistro}
                 </span>
 
                 <span>
-                  🕒 {r.horaRegistro}
+                  🕒 {r.horaregistro}
                 </span>
 
               </div>
@@ -94,30 +149,30 @@ function AdminView({
 
               </div>
 
-              {r.preview && (
+{r.comprobante_url && (
 
-                <img
-                  src={r.preview}
-                  alt=""
-                  className="comprobante"
+  <img
+    src={r.comprobante_url}
+    alt="Comprobante"
+    className="comprobante"
 
-                  onClick={() =>
-                    setImagenGrande(
-                      r.preview
-                    )
-                  }
-                />
+    onClick={() =>
+      setImagenGrande(
+        r.comprobante_url
+      )
+    }
+  />
 
-              )}
+)}
 
               <div className="acciones">
 
                 <button
                   className="btn-aprobar"
 
-                  onClick={() =>
-                    aprobarReservacion(index)
-                  }
+onClick={() =>
+  aprobarReservacion(r.id)
+}
                 >
                   Aprobar
                 </button>
@@ -125,9 +180,9 @@ function AdminView({
                 <button
                   className="btn-rechazar"
 
-                  onClick={() =>
-                    rechazarReservacion(index)
-                  }
+onClick={() =>
+  rechazarReservacion(r.id)
+}
                 >
                   Rechazar
                 </button>

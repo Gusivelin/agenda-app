@@ -1,8 +1,7 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { supabase } from "./supabase";
 import ClienteView from "./components/ClienteView";
 import AdminView from "./components/AdminView";
-
 import "./App.css";
 
 function App() {
@@ -13,29 +12,58 @@ function App() {
   const [reservaciones, setReservaciones] =
     useState([]);
 
+    useEffect(() => {
+
+  const cargarReservaciones =
+    async () => {
+
+      const {
+        data,
+        error
+      } = await supabase
+        .from("reservaciones")
+        .select("*");
+
+      if(error){
+
+        console.error(
+          "Error cargando reservaciones:",
+          error
+        );
+
+        return;
+
+      }
+
+      // setReservaciones(data);
+
+      console.log(data);
+
+setReservaciones(data);
+
+    };
+
+  cargarReservaciones();
+
+}, []);
+
   const [accesoAdmin, setAccesoAdmin] =
     useState(false);
 
   const [password, setPassword] =
     useState("");
 
-  /* CONTRASEÑA */
-
   const PASSWORD_ADMIN = "VERONAYESS";
-
   const ingresarAdmin = () => {
 
     if(password === PASSWORD_ADMIN){
 
       setAccesoAdmin(true);
-
       setVista("admin");
 
-    }else{
+    } else {
 
-      alert(
-        "Contraseña incorrecta"
-      );
+      alert("Contraseña incorrecta");
 
     }
 
@@ -46,75 +74,127 @@ function App() {
     <div>
 
       {/* TOPBAR */}
+<div className="navbar-app">
 
-      <div className="topbar">
+  <div className="navbar-logo">
 
-        <button
-          onClick={() => {
+    <div className="logo-icon">
+      🏊
+    </div>
 
-            setVista("cliente");
+    <div>
 
-          }}
-        >
-          Vista Residente
-        </button>
+      <h2>
+        Agenda Alberca
+      </h2>
 
-        <button
-          onClick={() => {
+      <span>
+        Verona - Brescia
+      </span>
 
-            if(accesoAdmin){
+    </div>
 
-              setVista("admin");
+  </div>
 
-            }else{
+  <div className="navbar-menu">
 
-              const pass =
-                prompt(
-                  "Ingresa contraseña"
-                );
+    <button
+      className={
+        vista === "cliente"
+          ? "nav-btn activo"
+          : "nav-btn"
+      }
+      onClick={() =>
+        setVista("cliente")
+      }
+    >
 
-              if(pass === PASSWORD_ADMIN){
+      <span>
+        🏠
+      </span>
 
-                setAccesoAdmin(true);
+      <span>
+        Residente
+      </span>
 
-                setVista("admin");
+    </button>
 
-              }else{
+    <button
+      className={
+        vista === "admin"
+          ? "nav-btn activo"
+          : "nav-btn"
+      }
+      onClick={() => {
 
-                alert(
-                  "Contraseña incorrecta"
-                );
+        if(accesoAdmin){
 
-              }
+          setVista("admin");
 
-            }
+        } else {
 
-          }}
-        >
-          Vista Administración
-        </button>
+          const pass =
+            prompt(
+              "Ingresa contraseña"
+            );
 
-      </div>
+          if(
+            pass === PASSWORD_ADMIN
+          ){
+
+            setAccesoAdmin(true);
+
+            setVista("admin");
+
+          } else {
+
+            alert(
+              "Contraseña incorrecta"
+            );
+
+          }
+
+        }
+
+      }}
+    >
+
+      <span>
+
+        {accesoAdmin
+          ? "👨‍💼"
+          : "🔒"}
+
+      </span>
+
+      <span>
+
+        {accesoAdmin
+          ? "Admin"
+          : "Acceso"}
+
+      </span>
+
+    </button>
+
+  </div>
+
+</div>
 
       {/* VISTAS */}
-
       {vista === "cliente" ? (
 
-        <ClienteView
-          reservaciones={reservaciones}
-          setReservaciones={
-            setReservaciones
-          }
-        />
+<ClienteView
+  reservaciones={reservaciones}
+  setReservaciones={setReservaciones}
+/>
 
       ) : (
 
-        <AdminView
-          reservaciones={reservaciones}
-          setReservaciones={
-            setReservaciones
-          }
-        />
+<AdminView
+  reservaciones={reservaciones}
+  setReservaciones={setReservaciones}
+/>
 
       )}
 
@@ -125,4 +205,3 @@ function App() {
 }
 
 export default App;
-

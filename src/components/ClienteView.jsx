@@ -1,6 +1,6 @@
-
 import { useState } from "react";
-
+import { supabase }
+from "../supabase";
 function ClienteView({
 
   reservaciones,
@@ -168,18 +168,36 @@ const domicilios = [
 
     });
 
-  const handleChange = (e) => {
+const handleChange = (e) => {
+
+  const { name, value } =
+    e.target;
+
+  if(name === "fechaReservada"){
 
     setFormulario({
 
       ...formulario,
 
-      [e.target.name]:
-        e.target.value
+      fechaReservada: value,
+
+      horario: ""
 
     });
 
-  };
+    return;
+
+  }
+
+  setFormulario({
+
+    ...formulario,
+
+    [name]: value
+
+  });
+
+};
 
   const handleImage = (e) => {
 
@@ -202,7 +220,7 @@ const domicilios = [
 
   };
 
-const reservar = (e) => {
+const reservar = async (e) => {
 
   e.preventDefault();
 
@@ -225,64 +243,432 @@ const reservar = (e) => {
 
   }
 
-  const existe = reservaciones.find(
+const existe =
+  reservaciones.find(
+
     (r) =>
 
-      r.fechaReservada ===
+      r.fechareservada ===
       formulario.fechaReservada &&
 
       r.horario ===
       formulario.horario &&
 
-      r.estado === "aprobado"
+      (
+        r.estado === "aprobado" ||
+        r.estado === "pendiente"
+      )
+
   );
 
   if(existe){
 
-    alert(
-      "Ese horario ya fue aprobado"
-    );
+alert(
+  "Ese horario ya tiene una solicitud registrada"
+);
 
     return;
 
   }
 
-  const ahora = new Date();
+const reservasDomicilio =
+  reservaciones.filter((r) =>
 
-  const nuevaReservacion = {
+    r.domicilio ===
+      formulario.domicilio &&
 
-    ...formulario,
+    (
+      r.estado === "pendiente" ||
+      r.estado === "aprobado"
+    )
 
-    estado:"pendiente",
-
-    fechaRegistro:
-      ahora.toLocaleDateString(),
-
-    horaRegistro:
-      ahora.toLocaleTimeString()
-
-  };
-
-  setReservaciones([
-    ...reservaciones,
-    nuevaReservacion
-  ]);
-
-  alert(
-    "Solicitud enviada"
   );
 
-  setFormulario({
+const entreSemana =
+  reservasDomicilio.filter((r) => {
 
-    domicilio:"",
-    fechaReservada:"",
-    horario:"",
-    comprobante:null,
-    preview:""
+    const fecha =
+      new Date(
+        r.fechareservada +
+        "T00:00:00"
+      );
 
-  });
+    const dia =
+      fecha.getDay();
+
+    return (
+      dia >= 1 &&
+      dia <= 4
+    );
+
+  }).length;
+
+const finSemana =
+  reservasDomicilio.filter((r) => {
+
+    const fecha =
+      new Date(
+        r.fechareservada +
+        "T00:00:00"
+      );
+
+    const dia =
+      fecha.getDay();
+
+    return (
+      dia === 5 ||
+      dia === 6 ||
+      dia === 0
+    );
+
+  }).length;
+
+  const nuevaEsFinSemana =
+  esFinDeSemana(
+    formulario.fechaReservada
+  );
+
+if (
+
+  nuevaEsFinSemana &&
+
+  finSemana >=
+    LIMITE_FIN_SEMANA
+
+){
+
+  alert(
+
+    "Este domicilio ya utilizó sus " +
+
+    LIMITE_FIN_SEMANA +
+
+    " reservaciones de fin de semana."
+
+  );
+
+  return;
+
+}
+
+if (
+
+  !nuevaEsFinSemana &&
+
+  entreSemana >=
+    LIMITE_ENTRE_SEMANA
+
+){
+
+  alert(
+
+    "Este domicilio ya utilizó sus " +
+
+    LIMITE_ENTRE_SEMANA +
+
+    " reservaciones entre semana."
+
+  );
+
+  return;
+
+}
+
+  const ahora = new Date();
+
+const nombreArchivo =
+  Date.now() +
+  "_" +
+  formulario.comprobante.name;
+
+const { error: errorImagen } =
+  await supabase.storage
+    .from("comprobantes")
+    .upload(
+      nombreArchivo,
+      formulario.comprobante
+    );
+
+if(errorImagen){
+
+  console.error(errorImagen);
+
+  alert(
+    "Error al subir imagen"
+  );
+
+  return;
+
+}
+
+const { data: urlData } =
+  supabase.storage
+    .from("comprobantes")
+    .getPublicUrl(
+      nombreArchivo
+    );
+
+const urlImagen =
+  urlData.publicUrl;
+
+const { data, error } =
+  await supabase
+    .from("reservaciones")
+    .insert([
+      {
+        domicilio:
+          formulario.domicilio,
+
+        fechareservada:
+          formulario.fechaReservada,
+
+        horario:
+          formulario.horario,
+
+        comprobante_url:
+          urlImagen,
+
+        estado:
+          "pendiente",
+
+        fecharegistro:
+          new Date()
+            .toLocaleDateString(),
+
+        horaregistro:
+          new Date()
+            .toLocaleTimeString()
+      }
+    ]);
+
+console.log("DATA:", data);
+console.log(
+  "ERROR COMPLETO:",
+  JSON.stringify(error, null, 2)
+);
+  
+alert(
+  "Solicitud enviada"
+);
+
+setFormulario({
+  domicilio:"",
+  fechaReservada:"",
+  horario:"",
+  comprobante:null,
+  preview:""
+});
 
 };
+
+const [fechaCalendario, setFechaCalendario] =
+  useState(new Date());
+
+const mes =
+  fechaCalendario.getMonth();
+
+const anio =
+  fechaCalendario.getFullYear();
+
+const primerDiaMes =
+  new Date(anio, mes, 1);
+
+let inicioSemana =
+  primerDiaMes.getDay();
+
+inicioSemana =
+  inicioSemana === 0
+    ? 6
+    : inicioSemana - 1;
+
+const diasMes =
+  new Date(
+    anio,
+    mes + 1,
+    0
+  ).getDate();
+
+const nombreMes =
+  fechaCalendario.toLocaleString(
+    "es-MX",
+    { month: "long" }
+  );
+
+const obtenerClaseEstado = (reserva) => {
+
+  if(!reserva){
+
+    return "slot";
+
+  }
+
+  switch(reserva.estado){
+
+    case "pendiente":
+      return "slot pendiente";
+
+    case "aprobado":
+      return "slot aprobado";
+
+    case "rechazado":
+      return "slot rechazado";
+
+    default:
+      return "slot";
+
+  }
+
+};
+
+ const obtenerHorarios = () => {
+
+  if(!formulario.fechaReservada){
+
+    return [];
+
+  }
+
+  const dia =
+    new Date(
+      formulario.fechaReservada +
+      "T00:00:00"
+    ).getDay();
+
+  const esFinSemana =
+
+    dia === 5 ||
+    dia === 6 ||
+    dia === 0;
+
+  if(esFinSemana){
+
+    return [
+
+      "09:00 AM - 03:00 PM",
+
+      "03:30 PM - 09:30 PM"
+
+    ];
+
+  }
+
+  return [
+
+    "08:00 AM - 12:30 PM",
+
+    "01:00 PM - 05:30 PM",
+
+    "06:00 PM - 10:00 PM"
+
+  ];
+
+};
+
+
+
+const reservasActuales =
+  reservaciones.filter((r) =>
+
+    r.domicilio ===
+      formulario.domicilio &&
+
+    (
+      r.estado === "pendiente" ||
+      r.estado === "aprobado"
+    )
+
+  );
+
+const usadasEntreSemana =
+  reservasActuales.filter((r) => {
+
+    const dia =
+      new Date(
+        r.fechareservada +
+        "T00:00:00"
+      ).getDay();
+
+    return (
+      dia >= 1 &&
+      dia <= 4
+    );
+
+  }).length;
+
+const usadasFinSemana =
+  reservasActuales.filter((r) => {
+
+    const dia =
+      new Date(
+        r.fechareservada +
+        "T00:00:00"
+      ).getDay();
+
+    return (
+      dia === 5 ||
+      dia === 6 ||
+      dia === 0
+    );
+
+  }).length;
+
+const LIMITE_ENTRE_SEMANA = 3;
+
+const LIMITE_FIN_SEMANA = 2;
+
+const esFinDeSemana = (fecha) => {
+
+  const dia =
+    new Date(
+      fecha + "T00:00:00"
+    ).getDay();
+
+  return (
+    dia === 5 || // Viernes
+    dia === 6 || // Sábado
+    dia === 0    // Domingo
+  );
+
+};
+
+const obtenerHorariosDisponibles = () => {
+
+  const horarios =
+    obtenerHorarios();
+
+  if(!formulario.fechaReservada){
+
+    return horarios;
+
+  }
+
+  return horarios.filter(
+    (horario) => {
+
+      const ocupado =
+        reservaciones.some((r) =>
+
+          r.fechareservada ===
+            formulario.fechaReservada &&
+
+          r.horario ===
+            horario &&
+
+          (
+            r.estado === "pendiente" ||
+            r.estado === "aprobado"
+          )
+
+        );
+
+      return !ocupado;
+
+    }
+  );
+
+};
+
+
 
   return (
 
@@ -292,14 +678,26 @@ const reservar = (e) => {
 
       <div className="card">
 
-        <h1>
-          Apartado Alberca
-        </h1>
+<div className="hero">
 
-        <p className="subtitulo">
-          Selecciona fecha y horario
-          para realizar tu solicitud.
-        </p>
+  <h1>
+    Sistema de Reservación
+  </h1>
+
+  <p>
+    Área de Alberca
+  </p>
+
+  <span>
+    Condominio Verona - Brescia
+  </span>
+
+</div>
+
+<p className="subtitulo">
+  Selecciona fecha y horario
+  para realizar tu solicitud.
+</p>
 
         <form onSubmit={reservar}>
 
@@ -314,7 +712,7 @@ const reservar = (e) => {
               value={formulario.domicilio}
               onChange={handleChange}
               required
-            >
+            >  
 
               <option value="">
                 Selecciona
@@ -333,6 +731,48 @@ const reservar = (e) => {
 
             </select>
 
+                         {formulario.domicilio && (
+
+  <div className="disponibilidad">
+
+    <p>
+
+      Entre semana:
+
+      {" "}
+
+      {
+        LIMITE_ENTRE_SEMANA -
+        usadasEntreSemana
+      }
+
+      {" / "}
+
+      {LIMITE_ENTRE_SEMANA}
+
+    </p>
+
+    <p>
+
+      Fin de semana:
+
+      {" "}
+
+      {
+        LIMITE_FIN_SEMANA -
+        usadasFinSemana
+      }
+
+      {" / "}
+
+      {LIMITE_FIN_SEMANA}
+
+    </p>
+
+  </div>
+
+)} 
+
           </div>
 
           <div className="input-group">
@@ -341,15 +781,20 @@ const reservar = (e) => {
               Fecha
             </label>
 
-            <input
-              type="date"
-              name="fechaReservada"
-              value={
-                formulario.fechaReservada
-              }
-              onChange={handleChange}
-              required
-            />
+<input
+  type="date"
+  name="fechaReservada"
+  value={
+    formulario.fechaReservada
+  }
+  onChange={handleChange}
+  min={
+    new Date()
+      .toISOString()
+      .split("T")[0]
+  }
+  required
+/>
 
           </div>
 
@@ -359,30 +804,43 @@ const reservar = (e) => {
               Horario
             </label>
 
-            <select
-              name="horario"
-              value={formulario.horario}
-              onChange={handleChange}
-              required
-            >
+<select
+  name="horario"
+  value={formulario.horario}
+  onChange={handleChange}
+  required
+>
 
-              <option value="">
-                Selecciona
-              </option>
+  <option value="">
+    Selecciona horario
+  </option>
 
-              <option>
-                10:00 AM
-              </option>
+{obtenerHorariosDisponibles().map(
+  (horario) => (
 
-              <option>
-                02:00 PM
-              </option>
+      <option
+        key={horario}
+        value={horario}
+      >
+        {horario}
+      </option>
 
-              <option>
-                06:00 PM
-              </option>
+    )
+  )}
 
-            </select>
+</select>
+
+{formulario.fechaReservada &&
+ obtenerHorariosDisponibles().length === 0 && (
+
+  <div className="sin-horarios">
+
+    No hay horarios disponibles
+    para esta fecha.
+
+  </div>
+
+)}
 
           </div>
 
@@ -445,118 +903,280 @@ const reservar = (e) => {
           Agenda Alberca
         </h2>
 
+<div className="leyenda">
+
+  <div>
+    <span className="color pendiente"></span>
+    Pendiente
+  </div>
+
+  <div>
+    <span className="color aprobado"></span>
+    Aprobado
+  </div>
+
+  <div>
+    <span className="color rechazado"></span>
+    Rechazado
+  </div>
+
+</div>
+
+<div className="mes-header">
+
+  <button
+    className="btn-mes"
+    onClick={() => {
+
+      const nuevaFecha =
+        new Date(
+          anio,
+          mes - 1,
+          1
+        );
+
+      setFechaCalendario(
+        nuevaFecha
+      );
+
+    }}
+  >
+    ◀
+  </button>
+
+  <h3>
+
+    {nombreMes.charAt(0)
+      .toUpperCase() +
+      nombreMes.slice(1)}
+
+    {" "}
+
+    {anio}
+
+  </h3>
+
+  <button
+    className="btn-mes"
+    onClick={() => {
+
+      const nuevaFecha =
+        new Date(
+          anio,
+          mes + 1,
+          1
+        );
+
+      setFechaCalendario(
+        nuevaFecha
+      );
+
+    }}
+  >
+    ▶
+  </button>
+
+</div>
+
+<div className="dias-semana">
+
+  <div>L</div>
+  <div>M</div>
+  <div>M</div>
+  <div>J</div>
+  <div>V</div>
+  <div>S</div>
+  <div>D</div>
+
+</div>
+
 <div className="calendario">
 
   {Array.from(
-    { length: 31 },
+    {
+      length:
+        inicioSemana +
+        diasMes
+    },
     (_, i) => {
 
-    const dia = i + 1;
+      if(i < inicioSemana){
 
-    /* MAÑANA */
+        return (
 
-    const reservaManana =
-      reservaciones.find((r) => {
+<div
+  key={`vacio-${anio}-${mes}-${i}`}
+  className="dia-vacio"
+/>
 
-      const diaReservado =
-        Number(
-          r.fechaReservada
-          .split("-")[2]
         );
 
-      return (
+      }
 
-        diaReservado === dia &&
-
-        r.horario === "10:00 AM" &&
-
-        r.estado === "aprobado"
-
-      );
-
-    });
-
-    /* TARDE */
-
-    const reservaTarde =
-      reservaciones.find((r) => {
-
-      const diaReservado =
-        Number(
-          r.fechaReservada
-          .split("-")[2]
-        );
-
-      return (
-
-        diaReservado === dia &&
-
-        r.horario === "02:00 PM" &&
-
-        r.estado === "aprobado"
-
-      );
-
-    });
-
-    /* NOCHE */
-
-    const reservaNoche =
-      reservaciones.find((r) => {
-
-      const diaReservado =
-        Number(
-          r.fechaReservada
-          .split("-")[2]
-        );
-
-      return (
-
-        diaReservado === dia &&
-
-        r.horario === "06:00 PM" &&
-
-        r.estado === "aprobado"
-
-      );
-
-    });
+      const dia =
+        i - inicioSemana + 1;
 
     return(
 
-      <div
-        key={dia}
-        className="dia-card"
-      >
+<div
+  key={`${anio}-${mes}-${dia}`}
+  className="dia-card"
+>
+<div className="numero-dia">
 
-        <div className="numero-dia">
-          {dia}
-        </div>
+  {dia}
 
-        <div className="horarios-dia">
+  <span className="contador-dia">
 
-          {/* MAÑANA */}
+    {(() => {
 
-          <div className="slot-wrapper">
+      const fechaActual =
+        new Date(
+          anio,
+          mes,
+          dia
+        );
+
+      const diaSemana =
+        fechaActual.getDay();
+
+      const totalHorarios =
+
+        diaSemana === 5 ||
+        diaSemana === 6 ||
+        diaSemana === 0
+
+          ? 2
+          : 3;
+
+      const ocupados =
+        reservaciones.filter((r) => {
+
+          const fechaReserva =
+            new Date(
+              r.fechareservada +
+              "T00:00:00"
+            );
+
+          return (
+
+            fechaReserva.getDate() === dia &&
+
+            fechaReserva.getMonth() === mes &&
+
+            fechaReserva.getFullYear() === anio &&
+
+            (
+              r.estado === "pendiente" ||
+              r.estado === "aprobado"
+            )
+
+          );
+
+        }).length;
+
+      return `${ocupados}/${totalHorarios}`;
+
+    })()}
+
+  </span>
+
+</div>
+
+<div className="horarios-dia">
+
+  {(() => {
+
+    const fechaActual =
+      new Date(
+        anio,
+        mes,
+        dia
+      );
+
+    const diaSemana =
+      fechaActual.getDay();
+
+    const horariosDia =
+
+      diaSemana === 5 ||
+      diaSemana === 6 ||
+      diaSemana === 0
+
+        ? [
+
+            "09:00 AM - 03:00 PM",
+
+            "03:30 PM - 09:30 PM"
+
+          ]
+
+        : [
+
+            "08:00 AM - 12:30 PM",
+
+            "01:00 PM - 05:30 PM",
+
+            "06:00 PM - 10:00 PM"
+
+          ];
+
+    return horariosDia.map(
+      (horario) => {
+
+        const reserva =
+reservaciones.find((r) => {
+
+  const fechaReserva =
+    new Date(
+      r.fechareservada +
+      "T00:00:00"
+    );
+
+  return (
+    fechaReserva.getDate() === dia &&
+    fechaReserva.getMonth() === mes &&
+    fechaReserva.getFullYear() === anio &&
+    r.horario === horario
+  );
+
+});
+
+        return (
+
+          <div
+            key={horario}
+            className="slot-wrapper"
+          >
 
             <div
               className={
-                reservaManana
-                ? "slot ocupado-manana"
-                : "slot"
+                obtenerClaseEstado(
+                  reserva
+                )
               }
             />
 
-            {reservaManana && (
+            {reserva && (
 
               <div className="tooltip">
 
                 <strong>
-                  10:00 AM
+                  {reserva.domicilio}
                 </strong>
 
                 <span>
-                  {reservaManana.domicilio}
+                  {reserva.horario}
+                </span>
+
+                <span>
+
+                  Estado:
+
+                  {" "}
+
+                  {reserva.estado}
+
                 </span>
 
               </div>
@@ -565,73 +1185,22 @@ const reservar = (e) => {
 
           </div>
 
-          {/* TARDE */}
+        );
 
-          <div className="slot-wrapper">
+      }
 
-            <div
-              className={
-                reservaTarde
-                ? "slot ocupado-tarde"
-                : "slot"
-              }
-            />
+    );
 
-            {reservaTarde && (
+  })()}
 
-              <div className="tooltip">
-
-                <strong>
-                  02:00 PM
-                </strong>
-
-                <span>
-                  {reservaTarde.domicilio}
-                </span>
-
-              </div>
-
-            )}
-
-          </div>
-
-          {/* NOCHE */}
-
-          <div className="slot-wrapper">
-
-            <div
-              className={
-                reservaNoche
-                ? "slot ocupado-noche"
-                : "slot"
-              }
-            />
-
-            {reservaNoche && (
-
-              <div className="tooltip">
-
-                <strong>
-                  06:00 PM
-                </strong>
-
-                <span>
-                  {reservaNoche.domicilio}
-                </span>
-
-              </div>
-
-            )}
-
-          </div>
-
-        </div>
+</div>
 
       </div>
 
     );
 
-  })}
+    }
+)}
 
 </div>
 
